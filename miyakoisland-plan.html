@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>宮古島しおり 5/4〜6</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap');
+
+  :root {
+    --sea: #0a7ea4;
+    --sea-bg: #e0f4fb;
+    --sea-text: #065270;
+    --eat: #c07800;
+    --eat-bg: #fff3d6;
+    --eat-text: #7a4c00;
+    --move: #6b4fc8;
+    --move-bg: #eeebff;
+    --move-text: #3d2a8a;
+    --stay: #1a7a55;
+    --stay-bg: #dff5ec;
+    --stay-text: #0d4a34;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --border: #e0e4ea;
+    --text: #1a1d23;
+    --sub: #6b7280;
+    --accent: #0a7ea4;
+    --dot-active: #1D9E75;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  /* ── ヘッダー ── */
+  .top-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .trip-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .trip-meta {
+    font-size: 12px;
+    color: var(--sub);
+    margin-top: 2px;
+  }
+  .badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .b-sea { background: var(--sea-bg); color: var(--sea-text); }
+  .b-eat { background: var(--eat-bg); color: var(--eat-text); }
+  .b-stay { background: var(--stay-bg); color: var(--stay-text); }
+
+  /* ── タブ ── */
+  .tab-bar {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 86px;
+    z-index: 99;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1;
+    min-width: 70px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--sub);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.on {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── パネル ── */
+  .panel { display: none; padding: 16px; }
+  .panel.on { display: block; }
+
+  /* ── トースト ── */
+  .toast {
+    display: none;
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1d23;
+    color: #fff;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 100px;
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  /* ── タイムライン ── */
+  .timeline { padding-left: 34px; }
+  .tl-item { position: relative; margin-bottom: 14px; }
+  .tl-item:last-child { margin-bottom: 0; }
+  .vline {
+    position: absolute;
+    left: -21px;
+    top: 22px;
+    bottom: -14px;
+    width: 1px;
+    background: var(--border);
+  }
+  .tl-item:last-child .vline { display: none; }
+  .dot {
+    position: absolute;
+    left: -28px;
+    top: 9px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--dot-active);
+    background: #fff;
+  }
+  .dot.done { background: var(--dot-active); }
+
+  .t-time { font-size: 11px; color: var(--sub); margin-bottom: 4px; letter-spacing: 0.03em; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px 13px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .card-title { font-size: 14px; font-weight: 500; color: var(--text); padding-right: 30px; }
+  .card-note { font-size: 12px; color: var(--sub); margin-top: 3px; line-height: 1.6; }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .t-sea { background: var(--sea-bg); color: var(--sea-text); }
+  .t-eat { background: var(--eat-bg); color: var(--eat-text); }
+  .t-move { background: var(--move-bg); color: var(--move-text); }
+  .t-stay { background: var(--stay-bg); color: var(--stay-text); }
+
+  /* ── 編集ボタン ── */
+  .edit-btn {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--sub);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .edit-btn:active { background: #e0e4ea; }
+
+  /* ── 編集フォーム ── */
+  .edit-form {
+    display: none;
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .edit-form.open { display: block; }
+  .e-label { font-size: 11px; color: var(--sub); margin-bottom: 3px; }
+  .e-row { margin-bottom: 8px; }
+  input.e-input, select.e-sel, textarea.e-ta {
+    width: 100%;
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  input.e-input:focus, select.e-sel:focus, textarea.e-ta:focus {
+    border-color: var(--accent);
+  }
+  textarea.e-ta { resize: vertical; min-height: 56px; }
+  .btn-row { display: flex; gap: 8px; margin-top: 6px; }
+  .save-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.1s;
+  }
+  .save-btn:active { opacity: 0.8; }
+  .del-btn {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid #f09595;
+    background: #fff;
+    color: #A32D2D;
+    font-size: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+  }
+
+  /* ── 追加ボタン ── */
+  .add-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: var(--radius);
+    border: 1.5px dashed var(--border);
+    background: none;
+    color: var(--sub);
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .add-btn:active { border-color: var(--accent); color: var(--accent); }
+
+  /* ── 宿泊タブ ── */
+  .hotel-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); }
+  .h-label { font-size: 11px; color: var(--sub); margin-bottom: 4px; }
+  .h-name { font-size: 17px; font-weight: 700; font-family: 'Noto Serif JP', serif; color: var(--text); }
+  .h-addr { font-size: 12px; color: var(--sub); margin-top: 2px; }
+  .h-rows { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .h-row { display: flex; justify-content: space-between; align-items: center; }
+  .h-key { font-size: 12px; color: var(--sub); }
+  .h-val { font-size: 13px; font-weight: 500; color: var(--text); }
+  .h-conf { color: var(--accent); }
+  .hotel-edit-form { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+
+  /* ── セクションタイトル ── */
+  .sec-title { font-size: 12px; font-weight: 700; color: var(--sub); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="trip-title">🏝 宮古島 2泊3日</div>
+  <div class="trip-meta">2025年5月4日（日）〜 6日（火）</div>
+  <div class="badges">
+    <span class="badge b-sea">与那覇前浜・池間島</span>
+    <span class="badge b-eat">島グルメ</span>
+    <span class="badge b-stay">シュノーケル三昧</span>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn on" onclick="sw(0)">5/4 1日目</button>
+  <button class="tab-btn" onclick="sw(1)">5/5 2日目</button>
+  <button class="tab-btn" onclick="sw(2)">5/6 3日目</button>
+  <button class="tab-btn" onclick="sw(3)">宿泊・予約</button>
+</div>
+
+<div class="panel on" id="p0"></div>
+<div class="panel" id="p1"></div>
+<div class="panel" id="p2"></div>
+<div class="panel" id="p3">
+  <div class="sec-title">宿泊先</div>
+  <div class="hotel-section">
+    <div class="h-label">2泊 — 5月4日〜6日</div>
+    <div class="h-name" id="h-name">宮古島東急ホテル&amp;リゾーツ</div>
+    <div class="h-addr" id="h-addr">沖縄県宮古島市下地与那覇914</div>
+    <div class="h-rows">
+      <div class="h-row"><span class="h-key">予約番号</span><span class="h-val h-conf" id="h-conf">TKY-05040001</span></div>
+      <div class="h-row"><span class="h-key">チェックイン</span><span class="h-val" id="h-ci">15:00〜</span></div>
+      <div class="h-row"><span class="h-key">チェックアウト</span><span class="h-val" id="h-co">〜11:00</span></div>
+      <div class="h-row"><span class="h-key">電話番号</span><span class="h-val" id="h-tel">0980-76-2109</span></div>
+    </div>
+    <div class="hotel-edit-form">
+      <div class="e-row"><div class="e-label">ホテル名</div><input class="e-input" id="ei-name" value="宮古島東急ホテル&amp;リゾーツ"></div>
+      <div class="e-row"><div class="e-label">住所</div><input class="e-input" id="ei-addr" value="沖縄県宮古島市下地与那覇914"></div>
+      <div class="e-row"><div class="e-label">予約番号</div><input class="e-input" id="ei-conf" value="TKY-05040001"></div>
+      <div class="e-row"><div class="e-label">チェックイン</div><input class="e-input" id="ei-ci" value="15:00〜"></div>
+      <div class="e-row"><div class="e-label">チェックアウト</div><input class="e-input" id="ei-co" value="〜11:00"></div>
+      <div class="e-row"><div class="e-label">電話番号</div><input class="e-input" id="ei-tel" value="0980-76-2109"></div>
+      <button class="save-btn" onclick="saveHotel()">宿泊情報を保存</button>
+    </div>
+  </div>
+
+  <div class="sec-title" style="margin-top:16px;">メモ・持ち物</div>
+  <div class="hotel-section">
+    <div class="e-row"><div class="e-label">自由メモ（持ち物・注意事項など）</div>
+    <textarea class="e-ta" id="memo-text" rows="6"></textarea></div>
+    <button class="save-btn" onclick="saveMemo()">メモを保存</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">保存しました ✓</div>
+
+<script>
+var TAG_LABEL = {sea:'海・自然', eat:'グルメ', move:'移動', stay:'宿泊'};
+var TAG_CLASS = {sea:'t-sea', eat:'t-eat', move:'t-move', stay:'t-stay'};
+
+var DEFAULT_DATA = [
+  [
+    {time:'10:30', title:'宮古空港 着', note:'那覇経由 / 荷物受け取り後レンタカーへ。免許証・予約番号を確認。', tag:'move'},
+    {time:'12:00', title:'麺や 来来 でランチ', note:'宮古そば発祥の老舗。ソーキそばが絶品。混雑時は行列あり。', tag:'eat'},
+    {time:'14:00', title:'与那覇前浜ビーチ', note:'日本一の白砂ビーチ。シュノーケル初日。透明度抜群。駐車場あり。', tag:'sea'},
+    {time:'17:00', title:'ホテル チェックイン', note:'与那覇前浜まで徒歩3分。荷ほどき＆夕日鑑賞を忘れずに。', tag:'stay'},
+    {time:'19:00', title:'居酒屋 とうま でディナー', note:'島魚の刺身・もずく天ぷら。地元泡盛も楽しもう。要確認。', tag:'eat'}
+  ],
+  [
+    {time:'08:00', title:'ホテル朝食', note:'テラスから前浜の朝日を見ながら。ゆっくり出発準備。', tag:'stay'},
+    {time:'09:30', title:'池間島 ドライブ', note:'池間大橋を渡って島を一周。サンゴ礁の海が絶景。', tag:'sea'},
+    {time:'11:00', title:'八重干瀬 シュノーケルツアー', note:'離島のサンゴ礁。要事前予約。¥7,000/人。日焼け止め必須。', tag:'sea'},
+    {time:'14:00', title:'西里通りでランチ＆散策', note:'島の中心商店街。宮古牛バーガーが名物。お土産も見ながら。', tag:'eat'},
+    {time:'16:00', title:'砂山ビーチ', note:'岩のアーチが映える穴場ビーチ。夕日がおすすめ。駐車場注意。', tag:'sea'},
+    {time:'19:30', title:'炭火焼 一心 でディナー', note:'宮古牛を堪能。要予約。¥6,000/人目安。', tag:'eat'}
+  ],
+  [
+    {time:'08:30', title:'チェックアウト', note:'荷物をフロントに預けてからビーチへ。15時まで預かり可。', tag:'stay'},
+    {time:'09:30', title:'来間島 散策', note:'来間大橋を渡る。竜宮城展望台から宮古ブルーの絶景。', tag:'sea'},
+    {time:'11:30', title:'ピパーチキッチンでランチ', note:'空港近く。島野菜を使ったヘルシーランチ。人気店。', tag:'eat'},
+    {time:'13:30', title:'お土産購入', note:'雪塩・ちんすこう・宮古ラム。空港内でも買えるが品薄注意。', tag:'eat'},
+    {time:'15:20', title:'宮古空港 発', note:'那覇乗継。搭乗30分前には保安検査を通過すること。', tag:'move'}
+  ]
+];
+
+var STORAGE_KEY = 'miyako_shiori_v1';
+var HOTEL_KEY = 'miyako_hotel_v1';
+var MEMO_KEY = 'miyako_memo_v1';
+
+function loadData() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+}
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); } catch(e) {}
+}
+
+function loadHotel() {
+  try {
+    var raw = localStorage.getItem(HOTEL_KEY);
+    if (!raw) return;
+    var h = JSON.parse(raw);
+    document.getElementById('h-name').textContent = h.name || '';
+    document.getElementById('h-addr').textContent = h.addr || '';
+    document.getElementById('h-conf').textContent = h.conf || '';
+    document.getElementById('h-ci').textContent = h.ci || '';
+    document.getElementById('h-co').textContent = h.co || '';
+    document.getElementById('h-tel').textContent = h.tel || '';
+    document.getElementById('ei-name').value = h.name || '';
+    document.getElementById('ei-addr').value = h.addr || '';
+    document.getElementById('ei-conf').value = h.conf || '';
+    document.getElementById('ei-ci').value = h.ci || '';
+    document.getElementById('ei-co').value = h.co || '';
+    document.getElementById('ei-tel').value = h.tel || '';
+  } catch(e) {}
+}
+
+function saveHotel() {
+  var h = {
+    name: document.getElementById('ei-name').value,
+    addr: document.getElementById('ei-addr').value,
+    conf: document.getElementById('ei-conf').value,
+    ci: document.getElementById('ei-ci').value,
+    co: document.getElementById('ei-co').value,
+    tel: document.getElementById('ei-tel').value
+  };
+  document.getElementById('h-name').textContent = h.name;
+  document.getElementById('h-addr').textContent = h.addr;
+  document.getElementById('h-conf').textContent = h.conf;
+  document.getElementById('h-ci').textContent = h.ci;
+  document.getElementById('h-co').textContent = h.co;
+  document.getElementById('h-tel').textContent = h.tel;
+  try { localStorage.setItem(HOTEL_KEY, JSON.stringify(h)); } catch(e) {}
+  showToast();
+}
+
+function loadMemo() {
+  try {
+    var m = localStorage.getItem(MEMO_KEY);
+    if (m) document.getElementById('memo-text').value = m;
+  } catch(e) {}
+}
+
+function saveMemo() {
+  try { localStorage.setItem(MEMO_KEY, document.getElementById('memo-text').value); } catch(e) {}
+  showToast();
+}
+
+var appData = loadData();
+var currentDay = 0;
+
+function renderDay(di) {
+  var p = document.getElementById('p' + di);
+  var items = appData[di];
+  var html = '<div class="timeline">';
+  items.forEach(function(item, ii) {
+    var tc = TAG_CLASS[item.tag] || 't-move';
+    var tl = TAG_LABEL[item.tag] || '移動';
+    var opts = ['sea','eat','move','stay'].map(function(c) {
+      return '<option value="' + c + '"' + (c === item.tag ? ' selected' : '') + '>' + TAG_LABEL[c] + '</option>';
+    }).join('');
+    html += '<div class="tl-item" id="ti-' + di + '-' + ii + '">';
+    html += '<div class="vline"></div>';
+    html += '<div class="dot' + (ii === 0 ? ' done' : '') + '"></div>';
+    html += '<div class="t-time">' + esc(item.time) + '</div>';
+    html += '<div class="card">';
+    html += '<div class="card-title">' + esc(item.title) + '</div>';
+    html += '<button class="edit-btn" onclick="toggleEdit(' + di + ',' + ii + ')">✎</button>';
+    html += '<div class="card-note">' + esc(item.note) + '</div>';
+    html += '<span class="tag ' + tc + '">' + tl + '</span>';
+    html += '<div class="edit-form" id="ef-' + di + '-' + ii + '">';
+    html += '<div class="e-row"><div class="e-label">時刻</div><input class="e-input" id="et-' + di + '-' + ii + '" value="' + esc(item.time) + '"></div>';
+    html += '<div class="e-row"><div class="e-label">タイトル</div><input class="e-input" id="etit-' + di + '-' + ii + '" value="' + esc(item.title) + '"></div>';
+    html += '<div class="e-row"><div class="e-label">メモ</div><textarea class="e-ta" id="en-' + di + '-' + ii + '">' + esc(item.note) + '</textarea></div>';
+    html += '<div class="e-row"><div class="e-label">カテゴリ</div><select class="e-sel" id="ecat-' + di + '-' + ii + '">' + opts + '</select></div>';
+    html += '<div class="btn-row"><button class="save-btn" onclick="saveItem(' + di + ',' + ii + ')">保存する</button>';
+    html += '<button class="del-btn" onclick="delItem(' + di + ',' + ii + ')">削除</button></div>';
+    html += '</div></div></div>';
+  });
+  html += '</div>';
+  html += '<button class="add-btn" onclick="addItem(' + di + ')">＋ 予定を追加</button>';
+  p.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toggleEdit(di, ii) {
+  var ef = document.getElementById('ef-' + di + '-' + ii);
+  ef.classList.toggle('open');
+}
+
+function saveItem(di, ii) {
+  appData[di][ii] = {
+    time: document.getElementById('et-' + di + '-' + ii).value,
+    title: document.getElementById('etit-' + di + '-' + ii).value,
+    note: document.getElementById('en-' + di + '-' + ii).value,
+    tag: document.getElementById('ecat-' + di + '-' + ii).value
+  };
+  saveData();
+  renderDay(di);
+  showToast();
+}
+
+function delItem(di, ii) {
+  if (!confirm('この予定を削除しますか？')) return;
+  appData[di].splice(ii, 1);
+  saveData();
+  renderDay(di);
+  showToast();
+}
+
+function addItem(di) {
+  appData[di].push({time:'00:00', title:'新しい予定', note:'メモを入力してください', tag:'sea'});
+  saveData();
+  renderDay(di);
+  var last = document.querySelectorAll('#p' + di + ' .edit-form');
+  if (last.length) last[last.length - 1].classList.add('open');
+  showToast();
+}
+
+function sw(idx) {
+  [0,1,2,3].forEach(function(i) {
+    document.getElementById('p' + i).classList.toggle('on', i === idx);
+    document.querySelectorAll('.tab-btn')[i].classList.toggle('on', i === idx);
+  });
+  currentDay = idx;
+}
+
+var toastTimer;
+function showToast() {
+  var t = document.getElementById('toast');
+  t.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.style.display = 'none'; }, 1800);
+}
+
+renderDay(0); renderDay(1); renderDay(2);
+loadHotel();
+loadMemo();
+</script>
+</body>
+</html>
